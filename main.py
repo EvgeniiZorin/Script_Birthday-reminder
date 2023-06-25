@@ -26,10 +26,10 @@ try:
 				date = i['date']
 				if date.strftime("%d.%m") == datetime.date.today().strftime("%d.%m"):
 				# if date == datetime.date.today():
-					print(i['name'], i['date'], i['type_of_event'])
+					# print(i['name'], i['date'], i['type_of_event'])
 					birthdaysToday.append([i['name'], i['date']])
 
-			print(birthdaysToday)
+			# print(birthdaysToday)
 
 except Exception as error:
 	print(error)
@@ -45,8 +45,6 @@ for i in birthdaysToday:
     date = i[1].strftime("%d.%m.%y")
     birthdaysTodayOutput += f"{date} {i[0]}\n"
 
-birthdaysTodayOutput
-
 ### Module 3. Send email
 
 server = smtplib.SMTP_SSL("smtp.gmail.com", 465)
@@ -54,9 +52,10 @@ server.login(mySecrets.gmailEmail, mySecrets.gmailKey) # The password is from 'm
 
 msg = EmailMessage()
 if birthdaysTodayOutput == '':
-	msg.set_content(
-	f"""no birthdays today.
-	""")
+	# msg.set_content(
+	# f"""no birthdays today.
+	# """)
+	pass
 else:
 	msg.set_content(
 	f"""Hello there!
