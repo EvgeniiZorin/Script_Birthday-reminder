@@ -28,9 +28,7 @@ try:
 				# if date == datetime.date.today():
 					# print(i['name'], i['date'], i['type_of_event'])
 					birthdaysToday.append([i['name'], i['date']])
-
 			# print(birthdaysToday)
-
 except Exception as error:
 	print(error)
 finally:
@@ -47,26 +45,26 @@ for i in birthdaysToday:
 
 ### Module 3. Send email
 
-server = smtplib.SMTP_SSL("smtp.gmail.com", 465)
-server.login(mySecrets.gmailEmail, mySecrets.gmailKey) # The password is from 'myaccount.google.com/apppasswords' - App Passwords
+def send_email(inputMessage):
+	server = smtplib.SMTP_SSL("smtp.gmail.com", 465)
+	server.login(mySecrets.gmailEmail, mySecrets.gmailKey) # The password is from 'myaccount.google.com/apppasswords' - App Passwords
+	msg = EmailMessage()
+	message = msg.set_content(inputMessage)
+	msg['Subject'] = f'Birthdays today'
+	msg['From'] = mySecrets.gmailEmail
+	msg['To'] = mySecrets.gmailEmail
+	server.send_message(msg)
+	server.quit()
 
-msg = EmailMessage()
-if birthdaysTodayOutput == '':
-	# msg.set_content(
-	# f"""no birthdays today.
-	# """)
-	pass
-else:
-	msg.set_content(
-	f"""Hello there!
+message = \
+f"""Hello there!
+
 Today's birthdays:
 
 {birthdaysTodayOutput}
-	""")
-msg['Subject'] = f'Birthdays today'
-msg['From'] = mySecrets.gmailEmail
-msg['To'] = mySecrets.gmailEmail
+"""
 
-server.send_message(msg)
-
-server.quit()
+if birthdaysTodayOutput == '':
+	pass
+else:
+	send_email(message)
