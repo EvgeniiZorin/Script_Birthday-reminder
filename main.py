@@ -1,70 +1,43 @@
-import psycopg2
-import psycopg2.extras
-
-import datetime
-
-import smtplib
-from email.mime.text import MIMEText
-from email.message import EmailMessage
-
-import mySecrets
-
+from utils.connections import (
+	query_db,
+	send_email
+)
 
 ### Module 1. Get Birthdays
+if __name__ == '__main__':
+	# Queries
+	# Query birthdays that happened on this day and month
+	df1 = query_db('sql/query_birthdays_current_month_day.sql')
+	# Convert it into the markdown format
+	df1_markdown = (
+		df1
+		[['name', 'date', 'type_of_event', 'anniversary_years']]
+		.to_markdown(index = False)
+	)
+	# Query the next 3 birthdays
+	df2 = query_db('sql/query_next_3_birthdays.sql')
+	# Convert it into the markdown format
+	df2_markdown = (
+		df2 
+		[['name', 'date', 'type_of_event', 'anniversary_years']]
+		.to_markdown(index = False)
+	)
+	# Send an email
+	message = \
+	f"""
+# Hello Evgenii! 👋
 
-conn = None
+These are the birthdays that happened on this day and month:
 
-birthdaysToday = []
+{df1_markdown}
 
-try:
-	with psycopg2.connect(mySecrets.psqlKey) as conn:
-		with conn.cursor() as cur:
-			cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
-			# SQL statements
-			cur.execute("SELECT * FROM notable_dates;")
-			for i in cur.fetchall():
-				date = i['date']
-				if date.strftime("%d.%m") == datetime.date.today().strftime("%d.%m"):
-				# if date == datetime.date.today():
-					# print(i['name'], i['date'], i['type_of_event'])
-					birthdaysToday.append([i['name'], i['date']])
-			# print(birthdaysToday)
-except Exception as error:
-	print(error)
-finally:
-	if conn is not None:
-		conn.close()
+Additionally, these are the next 3 events to celebrate in the near future:
 
+{df2_markdown}
 
-### Module 2. Format birthdays
+<br><br>
 
-birthdaysTodayOutput = ''
-for i in birthdaysToday:
-    date = i[1].strftime("%d.%m.%y")
-    birthdaysTodayOutput += f"{date} {i[0]}\n"
-
-### Module 3. Send email
-
-def send_email(inputMessage):
-	server = smtplib.SMTP_SSL("smtp.gmail.com", 465)
-	server.login(mySecrets.gmailEmail, mySecrets.gmailKey) # The password is from 'myaccount.google.com/apppasswords' - App Passwords
-	msg = EmailMessage()
-	message = msg.set_content(inputMessage)
-	msg['Subject'] = f'Birthdays today'
-	msg['From'] = mySecrets.gmailEmail
-	msg['To'] = mySecrets.gmailEmail
-	server.send_message(msg)
-	server.quit()
-
-message = \
-f"""Hello there!
-
-Today's birthdays:
-
-{birthdaysTodayOutput}
+You can see the code on the [Github page](https://github.com/EvgeniiZorin/Script_Birthday-reminder).
 """
-
-if birthdaysTodayOutput == '':
-	pass
-else:
-	send_email(message)
+	if len(df1) > 0:
+		send_email(message)

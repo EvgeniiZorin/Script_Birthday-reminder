@@ -12,8 +12,8 @@ env
 .env
 
 ### Scrap notebook
-checks.py
-checks.ipynb
+check*.py
+check*.ipynb
 practice.py
 practice.ipynb
 temp.py
